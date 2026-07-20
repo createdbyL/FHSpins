@@ -1,0 +1,7 @@
+key,name,cost,color,mode
+common,Common,30000,#8a93a3,standard
+rare,Rare,100000,#4ea1ff,standard
+epic,Epic,250000,#b24eff,standard
+legendary,Legendary,1000000,#ffb800,standard
+forza specials,Forza Specials,750000,#fc355a,standard
+super,Super Wheel,5000000,#17e6c9,super
