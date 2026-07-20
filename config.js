@@ -25,8 +25,8 @@ const APP_CONFIG = {
     { label: "STOLEN (1 credit was left at the scene)", min: 0.0, max: 0.0, weight: 1},
     { label: "Lowball bid", min: 0.6, max: 0.7, weight: 14 },
     { label: "Fair market price", min: 0.9, max: 1.1, weight: 50 },
-    { label: "Strong bidding", min: 1.2, max: 1.5, weight: 20 },
-    { label: "Bidding war!", min: 1.3, max: 1.4, weight: 14 },
+    { label: "Strong bidding", min: 1.2, max: 1.4, weight: 20 },
+    { label: "Bidding war!", min: 1.5, max: 1.6, weight: 14 },
     { label: "Jackpot buyer!", min: 2.0, max: 3.0, weight: 1 },
   ],
   // Jobs: a free way to earn credits over time if you run out
