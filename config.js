@@ -26,7 +26,7 @@ const APP_CONFIG = {
     { label: "Lowball bid", min: 0.4, max: 0.5, weight: 14 },
     { label: "Fair market price", min: 0.9, max: 1.1, weight: 50 },
     { label: "Strong bidding", min: 1.2, max: 1.5, weight: 20 },
-    { label: "Bidding war!", min: 1.6, max: 1.8, weight: 14 },
+    { label: "Bidding war!", min: 1.5, max: 1.6, weight: 14 },
     { label: "Jackpot buyer!", min: 2.0, max: 3.0, weight: 1 },
   ],
   // Jobs: a free way to earn credits over time if you run out
