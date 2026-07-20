@@ -1,16 +1,10 @@
-/* ============================================================
-   FESTIVAL WHEELS — app.js
-   Static, client-only. Reads live loot tables from Google Sheets
-   (CSV export), falls back to demo data if no sheet is configured.
-   ============================================================ */
 
 window.addEventListener("error", (e) => {
   console.error("Festival Wheels error:", e.error || e.message);
   toastSafe(`Something broke: ${e.message}. Check the browser console for details.`);
 });
 function toastSafe(msg) {
-  // toast() is defined further down; this wrapper lets the global error
-  // handler above call it even if it fires before the rest of the file runs.
+
   try { toast(msg); } catch { alert(msg); }
 }
 
@@ -42,41 +36,6 @@ let STATE = {
   currentView: "wheels",
 };
 
-/* ---------------- demo fallback data ---------------- */
-function demoWheels() {
-  return [
-    { key: "bronze", name: "Bronze Wheel", cost: 100, color: "#8a93a3", loot: [
-      { id: "b1", name: "Rusty Pickup", rarity: "common", value: 60, weight: 40 },
-      { id: "b2", name: "Compact Hatchback", rarity: "common", value: 90, weight: 35 },
-      { id: "b3", name: "Sport Coupe '98", rarity: "rare", value: 220, weight: 20 },
-      { id: "b4", name: "Vintage Roadster", rarity: "epic", value: 500, weight: 5 },
-    ]},
-    { key: "silver", name: "Silver Wheel", cost: 250, color: "#4ea1ff", loot: [
-      { id: "s1", name: "Rally Hatch", rarity: "common", value: 140, weight: 35 },
-      { id: "s2", name: "Turbo Coupe", rarity: "rare", value: 380, weight: 35 },
-      { id: "s3", name: "Track Special", rarity: "rare", value: 420, weight: 20 },
-      { id: "s4", name: "Widebody GT", rarity: "epic", value: 950, weight: 10 },
-    ]},
-    { key: "gold", name: "Gold Wheel", cost: 600, color: "#ffb800", loot: [
-      { id: "g1", name: "Muscle Classic", rarity: "rare", value: 500, weight: 30 },
-      { id: "g2", name: "Twin-Turbo GT", rarity: "epic", value: 1400, weight: 40 },
-      { id: "g3", name: "Rally Legend", rarity: "epic", value: 1650, weight: 22 },
-      { id: "g4", name: "Hypercar Prototype", rarity: "legendary", value: 4200, weight: 8 },
-    ]},
-    { key: "platinum", name: "Platinum Wheel", cost: 1200, color: "#b24eff", loot: [
-      { id: "p1", name: "Track-Tuned GT", rarity: "epic", value: 1800, weight: 40 },
-      { id: "p2", name: "Works Rally Car", rarity: "epic", value: 2100, weight: 32 },
-      { id: "p3", name: "Le Mans Prototype", rarity: "legendary", value: 5200, weight: 20 },
-      { id: "p4", name: "Festival One-Off", rarity: "legendary", value: 7800, weight: 8 },
-    ]},
-    { key: "diamond", name: "Diamond Wheel", cost: 2500, color: "#17e6c9", loot: [
-      { id: "d1", name: "Hypercar Prototype", rarity: "legendary", value: 6000, weight: 40 },
-      { id: "d2", name: "Bespoke Grand Tourer", rarity: "legendary", value: 8200, weight: 35 },
-      { id: "d3", name: "Festival Icon Edition", rarity: "legendary", value: 15000, weight: 15 },
-      { id: "d4", name: "One-of-One Concept", rarity: "legendary", value: 30000, weight: 10 },
-    ]},
-  ];
-}
 
 /* ---------------- CSV loading ---------------- */
 function csvUrl(sheetId, tab) {
@@ -110,7 +69,7 @@ function parseCSV(text) {
   });
 }
 
-// Fetches any CSV URL — a local file path or a remote one — and parses it.
+// Fetches any CSV URL - a local file path or a remote one - and parses it.
 async function fetchCSV(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch "${url}" (${res.status})`);
@@ -144,12 +103,6 @@ function mapWheelDef(row, loot) {
   };
 }
 
-// Local CSV files — the default and fastest option. Reads config.csv (one
-// row per wheel) plus a single items.csv holding every wheel's loot rows,
-// each tagged with a "wheel" column matching that wheel's key. Both fetched
-// in parallel with nothing else, so this loads near-instantly — and since
-// every drop rate lives in one file, tuning weights/values is a single
-// spreadsheet to scroll through instead of hunting across per-wheel files.
 async function loadWheelsFromLocalCSV() {
   const dir = (APP_CONFIG.LOCAL_DATA_DIR || "data").replace(/\/+$/, "");
   const itemsFile = APP_CONFIG.ITEMS_FILE || "items.csv";
@@ -164,8 +117,7 @@ async function loadWheelsFromLocalCSV() {
   if (!validRows.length) throw new Error(`No wheels found in ${dir}/config.csv (every row needs a "key")`);
 
   const wheels = validRows.map(row => {
-    // "super" wheels have no loot rows of their own — their pool is built
-    // live from every car you haven't collected yet (see getSuperWheelPool)
+    // "super" wheels have no loot rows of their own, their pool is built live from every car you haven't collected yet (see getSuperWheelPool)
     if (row.mode?.toLowerCase() === "super") return mapWheelDef(row, []);
     const lootRows = itemRows.filter(r => (r.wheel || "").toLowerCase() === row.key.toLowerCase());
     return mapWheelDef(row, lootRows.map((r, i) => mapLootRow(row.key, r, i)));
@@ -174,9 +126,7 @@ async function loadWheelsFromLocalCSV() {
   return wheels;
 }
 
-// Google Sheets — kept as an option if you'd rather edit loot tables from
-// a spreadsheet than local files. Slower to load since it's requests to
-// Google's servers, but editable from anywhere without touching the repo.
+// Google Sheets spreadsheet. Slower to load but editable from anywhere without touching the repo.
 // Set DATA_SOURCE to "sheet" in config.js to use this instead. Mirrors the
 // local-CSV structure: a Config tab (wheels) plus one Items tab shared by
 // every wheel, joined by the same "wheel" column.
@@ -365,10 +315,6 @@ function buildSlotRow(item) {
   return row;
 }
 
-// Builds a vertical reel strip inside the given element: a run of random
-// filler rows, then the winner, then one trailing filler row so the
-// viewport has something to show below the winner once it's centered.
-// Returns the winner's index within the strip.
 function buildReelStrip(stripEl, loot, winner) {
   stripEl.style.transition = "none";
   stripEl.style.transform = "translateY(0px)";
@@ -392,8 +338,6 @@ function rarityColorHex(rarity) {
   return map[String(rarity).trim().toLowerCase()] || map.common;
 }
 
-// Inline SVG car-silhouette placeholder, tinted per rarity, used whenever
-// a loot item has no "image" URL set in the sheet.
 const _fallbackCache = {};
 function fallbackImage(rarity) {
   const color = rarityColorHex(rarity);
@@ -481,8 +425,7 @@ function finishSpin(wheel, item) {
 
 /* ---------------- super wheel (5 reels at once, undiscovered cars only) ---------------- */
 
-// Every catalog entry you haven't discovered yet, with uniform odds — every
-// undiscovered car is equally likely to come up.
+
 function getSuperWheelPool() {
   return STATE.catalog
     .filter(entry => !STATE.collection[entry.key])
@@ -492,10 +435,6 @@ function getSuperWheelPool() {
     }));
 }
 
-// Weighted sampling WITHOUT replacement — used so the 5 simultaneous reels
-// can't land on the same car twice, since (unlike a sequential spin) none
-// of the wins are committed to the collection until all 5 reels have
-// stopped, so we can't rely on STATE.collection to rule out repeats.
 function weightedSampleWithoutReplacement(pool, count) {
   const remaining = [...pool];
   const picks = [];
@@ -510,8 +449,6 @@ function weightedSampleWithoutReplacement(pool, count) {
 
 const SUPER_WHEEL_PULLS = 5;
 
-// Builds the 5-column reel row inside #superReels and returns the 5 strip
-// elements in left-to-right order.
 function buildSuperReelsFrame() {
   const container = $("#superReels");
   container.innerHTML = `
@@ -568,8 +505,6 @@ async function doSuperSpin(wheel, strips) {
     ? `Only ${winners.length} car${winners.length === 1 ? "" : "s"} left to find!`
     : "Spinning all 5 reels…";
 
-  // build every strip with its own winner (columns beyond the number of
-  // available winners just stay on their idle preview and dim out)
   const winnerIndexes = strips.map((stripEl, i) => {
     if (i >= winners.length) {
       stripEl.closest(".slot-viewport").style.opacity = "0.25";
@@ -578,8 +513,7 @@ async function doSuperSpin(wheel, strips) {
     return buildReelStrip(stripEl, pool, winners[i]);
   });
 
-  // animate all 5 at once, but stagger the stop time left-to-right so
-  // they lock in one after another like a real slot machine
+
   const animations = strips.map((stripEl, i) => {
     if (winnerIndexes[i] == null) return Promise.resolve();
     const duration = 3.2 + i * 0.35; // seconds
@@ -593,7 +527,7 @@ async function doSuperSpin(wheel, strips) {
   });
   await Promise.all(animations);
 
-  // commit every win together, only once every reel has landed
+  
   winners.forEach(winner => {
     const uid = `inv_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
     STATE.inventory.unshift({
@@ -782,10 +716,7 @@ function startJob(key) {
   updateJobsBadge();
 }
 
-// Runs every tick (and once at boot). Awards credits for any job whose
-// timer has elapsed — including one that finished while the tab was
-// closed, since we compare against the stored start timestamp rather
-// than counting down locally. Returns true if anything completed.
+
 function checkJobCompletions() {
   let changed = false;
   APP_CONFIG.JOBS.forEach(job => {
@@ -860,17 +791,12 @@ function tickJobs() {
   if (STATE.currentView === "jobs") renderJobs();
 }
 
-/* ---------------- collection book ---------------- */
 
-// Items are matched into a single collection entry by name (trimmed,
-// case-insensitive) — so the same car appearing in two different wheels
-// counts as one collectible, not two.
 function collectionKey(name) {
   return name.trim().toLowerCase();
 }
 
-// Builds the full catalog of every unique item across every wheel. Called
-// once wheels are loaded/reloaded; drives the "locked" placeholders.
+
 function buildCatalog() {
   const seen = new Map();
   STATE.wheels.forEach(wheel => {
@@ -887,8 +813,7 @@ function buildCatalog() {
   STATE.catalog = Array.from(seen.values());
 }
 
-// Records a permanent discovery the first time an item is won. Returns
-// true if this was a brand-new entry (so the spin reveal can show a badge).
+
 function recordDiscovery(item, wheel) {
   const key = collectionKey(item.name);
   if (STATE.collection[key]) return false;
