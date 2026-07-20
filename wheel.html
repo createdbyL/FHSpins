@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FHSpins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=11">
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">FHS</span>
+    <div class="brand-text">
+      <span class="brand-title">FH SPINS</span>
+      <span class="brand-sub">Spin · Collect · Auction</span>
+    </div>
+  </div>
+
+  <div class="credits-pill" id="creditsPill">
+    <span class="credits-label">CREDITS</span>
+    <span class="credits-value" id="creditsValue">0</span>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab-btn active" data-view="wheels">Wheels</button>
+    <button class="tab-btn" data-view="inventory">Inventory <span class="count-badge" id="invCount">0</span></button>
+    <button class="tab-btn" data-view="shop">Auction</button>
+    <button class="tab-btn" data-view="collection">Collection <span class="count-badge" id="collectionCount">0/0</span></button>
+    <button class="tab-btn" data-view="jobs">Jobs <span class="count-badge" id="jobsActiveCount" hidden>0</span></button>
+  </nav>
+</header>
+
+<main id="app">
+
+  <!-- WHEELS VIEW -->
+  <section class="view" id="view-wheels">
+    <div class="section-head">
+      <h1>Choose your wheel</h1>
+      <p class="section-sub">Five tiers and a super spin for the collectors.</p>
+    </div>
+
+    <div class="status-banner" id="dataStatus" hidden></div>
+
+    <div class="wheel-grid" id="wheelGrid">
+      <!-- wheel cards injected by app.js -->
+    </div>
+  </section>
+
+  <!-- INVENTORY VIEW -->
+  <section class="view hidden" id="view-inventory">
+    <div class="section-head">
+      <h1>Inventory</h1>
+      <p class="section-sub">Everything you've won. Head to the Auction House to sell.</p>
+    </div>
+    <div class="inventory-grid" id="inventoryGrid"></div>
+    <p class="empty-state" id="invEmpty" hidden>No items yet - go spin a wheel.</p>
+  </section>
+
+  <!-- AUCTION HOUSE VIEW -->
+  <section class="view hidden" id="view-shop">
+    <div class="section-head">
+      <h1>Auction House</h1>
+      <p class="section-sub">Quick Sell for a guaranteed payout at a 50% loss, or send it to auction for a shot at more.</p>
+    </div>
+
+    <div class="inventory-toolbar">
+      <div class="filter-group" id="rarityFilters">
+        <button class="chip active" data-rarity="all">All</button>
+      </div>
+      <button class="btn btn-sell-all" id="sellAllBtn">Quick Sell All (-50% Base Value)</button>
+    </div>
+
+    <div class="inventory-grid" id="shopGrid"></div>
+    <p class="empty-state" id="shopEmpty" hidden>Nothing here yet - items you win will show up here.</p>
+  </section>
+
+  <!-- COLLECTION VIEW -->
+  <section class="view hidden" id="view-collection">
+    <div class="section-head">
+      <h1>Collection Book</h1>
+      <p class="section-sub">Every car across every wheel. Win one from a spin to fill in its entry for good, even after you sell it.</p>
+    </div>
+
+    <div class="collection-progress">
+      <div class="progress-track"><div class="progress-fill" id="collectionProgressFill"></div></div>
+      <span class="progress-label" id="collectionProgressLabel">0 / 0 discovered</span>
+    </div>
+
+    <div class="filter-group" id="collectionFilters"></div>
+
+    <div class="collection-grid" id="collectionGrid"></div>
+  </section>
+
+  <!-- JOBS VIEW -->
+  <section class="view hidden" id="view-jobs">
+    <div class="section-head">
+      <h1>Jobs</h1>
+      <p class="section-sub">Short on credits? Clock in! Each job pays out automatically once its timer's up.</p>
+    </div>
+
+    <div class="jobs-grid" id="jobsGrid"></div>
+  </section>
+
+</main>
+
+<!-- SPIN OVERLAY — kept as a sibling of <main>, not nested inside it.
+     main{} sets position:relative + z-index:1, which creates its own
+     stacking context; anything nested inside it (no matter its own
+     z-index) is capped at that context and can end up trapped behind
+     the sticky header. Living outside main avoids that entirely. -->
+<div class="spin-overlay" id="spinOverlay" hidden>
+  <div class="spin-stage">
+    <button class="close-spin" id="closeSpin" aria-label="Close">✕</button>
+    <h2 class="spin-wheel-title" id="spinWheelTitle">—</h2>
+    <p class="spin-round-indicator" id="spinRoundIndicator" hidden></p>
+    <div class="slot-frame" id="slotFrameSingle">
+      <div class="slot-pointer-left"></div>
+      <div class="slot-pointer-right"></div>
+      <div class="slot-viewport">
+        <div class="slot-strip" id="slotStrip"></div>
+        <div class="slot-fade-top"></div>
+        <div class="slot-fade-bottom"></div>
+        <div class="slot-center-line"></div>
+      </div>
+    </div>
+    <div class="super-reels" id="superReels" hidden></div>
+    <div class="spin-result" id="spinResult" hidden>
+      <div class="result-card" id="resultCard"></div>
+      <div class="spin-actions">
+        <button class="btn btn-ghost" id="spinAgainBtn">Spin Again</button>
+        <button class="btn btn-primary" id="doneSpinBtn">To Inventory</button>
+      </div>
+    </div>
+    <div class="spin-result" id="superSummary" hidden>
+      <p class="super-summary-title">Picked up <span id="superSummaryCount">0</span> new car(s)!</p>
+      <div class="inventory-grid super-summary-grid" id="superSummaryGrid"></div>
+      <div class="spin-actions">
+        <button class="btn btn-ghost" id="superAgainBtn">Spin Again</button>
+        <button class="btn btn-primary" id="superDoneBtn">To Inventory</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUCTION OVERLAY — also a sibling of <main>, same reasoning as the spin overlay above -->
+<div class="spin-overlay" id="auctionOverlay" hidden>
+  <div class="spin-stage">
+    <button class="close-spin" id="closeAuction" aria-label="Close">✕</button>
+    <h2 class="spin-wheel-title">Auction House</h2>
+    <div class="auction-preview" id="auctionPreview"></div>
+    <p class="auction-status" id="auctionStatus">Opening the floor…</p>
+    <div class="spin-result" id="auctionResultWrap" hidden>
+      <div class="result-card" id="auctionResultCard"></div>
+      <div class="spin-actions">
+        <button class="btn btn-primary" id="auctionDoneBtn">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js?v=11"></script>
+<script src="app.js?v=11"></script>
+</body>
+</html>
